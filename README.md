@@ -11,6 +11,8 @@ This is a DIY anchor alarm. It is designed to run on the Esp32.
 
 * Display 1306 .96in display
 
+* Rotary encoder: Just about any with a button will do. 
+
 * A buzzer. I used a magnetic, non self-oscillating buzzer. Small ones are better because they don't overpower the board and require other electronics like flyback diodes. You could also use a breakout board based buzzer, with those diodes incorporated. That would probably be safer for the esp32 and perhaps even louder. 
 
 
