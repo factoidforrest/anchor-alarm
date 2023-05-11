@@ -1,51 +1,27 @@
-<h1 align = "center">🌟LILYGO T-OI-PLUS🌟</h1>
+# Anchor Alarm
 
-## **English | [中文](./README_CN.MD)**
-
-<h3 align = "left">New version:</h3> 
-**The new version has fixed the glitch that caused crystal burrs to start wifi and ble reset**
-
-<h3 align = "left">Quick start:</h3>
+This is a DIY anchor alarm. It is designed to run on the Esp32.
 
 
-**USE PlatformIO**
+## Hardware
 
-1. Install[VSCODE](https://code.visualstudio.com/)and[Python](https://www.python.org/)
-2. Search for the PlatformIO plug-in in the VSCODE extension and install it.
-3. After the installation is complete and the reload is completed, there will be a small house icon in the lower left corner. Click to display the Platformio IDE home page
-4. Go to file - > Open folder - > Select the LilyGO-T-OI-PLUS folder and click the (√) symbol in the lower left corner to compile (→) for upload.
+* Mainboard: I ran it on the Esp32-c3 LilyGo OI plus, which is a compact form factor esp32 with an integrated battery slot. It could easily be adapted to others.
 
+* GPS: I used a compact neo-8m GPS but this could be adapted to virtually any GPS with no code change. Anything supported by tinygpsplus
 
-**USE Arduino IDE**
+* Display 1306 .96in display
 
-1. Install the current upstream Arduino IDE at the 1.8 level or later. The current version is at the [Arduino website](http://www.arduino.cc/en/main/software).
-2. Start Arduino and open Preferences window. In additional board manager add url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json .separating them with commas.
-3. Select Tools -> Board -> ESP32C3 Dev Module
-4. If you do not have a driver installed, you need to install it (Window:ch341ser2.exe, MAC:ch34x_mac_driver_v1.6.zip [New driver reference](https://github.com/LilyGO/LILYGO-T-OI/issues/3#issuecomment-907645945 ))
-5. Need to install the following dependencies
-     - [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
-
-**USE Micropython**
-
-1. [Download and upload the firmware](https://micropython.org/download/esp32c3/)
-2. Note that the firmware upload address is 0x0, not 0x1000.
+* A buzzer. I used a magnetic, non self-oscillating buzzer. Small ones are better because they don't overpower the board and require other electronics like flyback diodes. You could also use a breakout board based buzzer, with those diodes incorporated. That would probably be safer for the esp32 and perhaps even louder. 
 
 
+## 3d Printed Case
 
-<h3 align = "left">Product 📷:</h3>
+If you match the above hardware including the mainboard, you can use my 3d printed case. TODO: ADD LINK TO CASE
 
-|  Product  |                            Product  Link                            |
-| :-------: | :-----------------------------------------------------------------: |
-| T-OI-PLUS | [AliExpress](https://www.aliexpress.com/item/1005003348936965.html) |
+## Software
 
-## Pinout
+See src/main.cpp for the sketch. Other files are simply tests/ scratchpads I used for debugging. There's also a lot of extra files in here because this was forked from the LilyGo sample project, since this board is nonstandard and needs a lot of custom stuff for the firmware to compile. Standard esp32s wont need that. 
 
-![](image/new_TOI_Plus.png)
+### Compilation
 
-
-
-
-
-
-
-
+This project is compiled by platformio. It will handle all library fetching. Change the board target if you're using a different esp32 version or 8266. 
