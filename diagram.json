@@ -1,0 +1,39 @@
+{
+    "version": 1,
+    "author": "Forrest",
+    "editor": "wokwi",
+    "parts": [
+      {
+        "type": "board-esp32-c3-devkitm-1",
+        "id": "esp",
+        "top": -28.44,
+        "left": -203.29,
+        "attrs": {}
+      },
+      {
+        "type": "wokwi-buzzer",
+        "id": "bz1",
+        "top": 191.24,
+        "left": -200.05,
+        "attrs": { "volume": "0.1" }
+      },
+      { "type": "wokwi-ky-040", "id": "encoder1", "top": 127.11, "left": -19.3, "attrs": {} },
+      { "type": "board-ssd1306", "id": "oled1", "top": -41.2, "left": -31.31, "attrs": {} }
+    ],
+    "connections": [
+      [ "esp:TX", "$serialMonitor:RX", "", [] ],
+      [ "esp:RX", "$serialMonitor:TX", "", [] ],
+      [ "bz1:1", "esp:GND.5", "black", [ "h-86.23", "v-149.78" ] ],
+      [ "bz1:2", "esp:9", "orange", [ "h111.29", "v-245.78" ] ],
+      [ "encoder1:CLK", "esp:10", "green", [ "h-327.24", "v-47.95" ] ],
+      [ "encoder1:DT", "esp:7", "green", [ "h-171.26", "v-82.62" ] ],
+      [ "encoder1:SW", "esp:6", "green", [ "h23.27", "v-10.96" ] ],
+      [ "encoder1:VCC", "esp:3V3.2", "red", [ "h27.92", "v-215.96", "h-334.29", "v64.37" ] ],
+      [ "encoder1:GND", "esp:GND.6", "black", [ "h8.45", "v18.25", "h-219.61" ] ],
+      [ "esp:18", "oled1:SCL", "magenta", [ "v0.1", "h53.87", "v-184.4", "h78.37" ] ],
+      [ "esp:19", "oled1:SDA", "cyan", [ "h70.78", "v-183.66", "h3.59" ] ],
+      [ "oled1:VCC", "esp:3V3.1", "red", [ "v-55.09", "h-238.07", "v93.22" ] ],
+      [ "oled1:GND", "esp:GND.6", "black", [ "v0" ] ]
+    ],
+    "dependencies": {}
+  }
