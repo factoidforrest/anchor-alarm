@@ -28,7 +28,11 @@ If you match the above hardware including the mainboard, you can use my 3d print
 ![case pic](/schematic/sideonpic.jpg)
 
 ## Software
-Software has over-the-air update support (for the first five minutes after boot it creates a public wifi network, to save power). The device will alarm if it runs out of battery, loses the lock for over 10 seconds, or loses communications with the GPS. 
+Software has over-the-air update support: it creates a public wifi network for five minutes after boot. Hit 192.168.4.1/update to load new .bin firmware fil.
+
+The device will alarm if it runs out of battery, loses the lock for over 10 seconds, or loses communications with the GPS.  
+
+No attempts have been made to improve battery life.  It could probably be improved significantly by putting the GPS/display/esp32 to sleep for appropriate intervals. It appears to only last about 4 hours at present, and so should be plugged in overnight to your phone charger on the boat.
 
 
 See src/main.cpp for the sketch. Other files are simply tests/ scratchpads I used for debugging. There's also a lot of extra files in here because this was forked from the LilyGo sample project, since this board is nonstandard and needs a lot of custom stuff for the firmware to compile. Standard esp32s wont need that, you can just take the main.cpp sketch file.

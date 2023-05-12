@@ -70,8 +70,10 @@ void enableOTAUpdate() {
   server.begin();
 }
 
-int startupTime = millis();
+u_int32_t startupTime = millis();
 bool serverOn = true;
+
+u_int32_t lastTouchedTime = millis();
 
 int alarm_range = 250;
 
@@ -101,6 +103,7 @@ void read_encoder() {
    encval = 0;
   }
   // sei();
+  lastTouchedTime = millis();
 }
 
 void setup() {
@@ -108,7 +111,14 @@ void setup() {
 
     enableOTAUpdate();
 
+    lastTouchedTime = millis();
 
+    // esp_sleep_enable_uart_wakeup(0);
+    // gpio_wakeup_enable(GPIO_NUM_6, GPIO_INTR_LOW_LEVEL);
+    // gpio_wakeup_enable(GPIO_NUM_7, GPIO_INTR_LOW_LEVEL);
+    // gpio_wakeup_enable(GPIO_NUM_10, GPIO_INTR_LOW_LEVEL);
+
+    // esp_sleep_enable_gpio_wakeup();
 
     pinMode(ROTARY_PIN_A, INPUT_PULLUP);
     pinMode(ROTARY_PIN_B, INPUT_PULLUP);
@@ -153,6 +163,9 @@ void displayGPS() {
     display.println(String("Distance: " + String(current_distance, 2) + "ft").c_str());
   }
 
+  if (WiFi.getMode() != WIFI_OFF){
+    display.println("Wifi On");
+  }
   display.display();
 }
 
@@ -192,23 +205,46 @@ void lockLost() {
   }
 }
 
-void loop() {
-  button.loop();
-  
-  if (lastGpsLock.isValid() && lastGpsLock.age() > 10000 && is_armed){
-  lockLost();
-  }
+void handleDisplaySleep(){
 
+  if ((millis() - lastTouchedTime) > 120000){
+    display.ssd1306_command(SSD1306_DISPLAYOFF);
+  } else {
+    display.ssd1306_command(SSD1306_DISPLAYON);
+  }
+}
+
+void handleWifiSleep(){
   // after 5 minutes shut off wifi
   if (serverOn && (millis() - startupTime) > 300000){
     serverOn = false;
     server.end();
     WiFi.mode( WIFI_OFF );
     btStop();
+    // slow down the cpu, actual sleep is too hard but this is pretty good
+    if (!setCpuFrequencyMhz(40)){
+      setCpuFrequencyMhz(80);
+    }
+  }
+}
+
+void loop() {
+  button.loop();
+  
+  handleDisplaySleep();
+
+  handleWifiSleep();
+
+  if (lastGpsLock.isValid() && lastGpsLock.age() > 10000 && is_armed){
+    lockLost();
   }
 
 
+
+
   Voltage = (readADC_Cal(analogRead(BAT_ADC))) * 2 ;
+
+
   while (Serial.available() > 0){
     if (gps.encode(Serial.read())) {
       if (!gps.location.isValid() && lastGpsLock.age() > 10000) {
@@ -216,6 +252,7 @@ void loop() {
       } else {
         lastGpsLock = gps.time;
         if (button.getCount() > 0) {
+          lastTouchedTime = millis();
           button.resetCount();
           if (is_armed) {
             is_armed = false;
@@ -233,6 +270,7 @@ void loop() {
         display.println("GPS Error");
     }
   }
+
 }
 
 
