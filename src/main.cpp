@@ -6,6 +6,9 @@
 #include <Adafruit_SSD1306.h>
 #include "esp_adc_cal.h"
 #include <pwmWrite.h>
+#include <AsyncElegantOTA.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -51,6 +54,24 @@ uint32_t readADC_Cal(int ADC_Raw)
     return (esp_adc_cal_raw_to_voltage(ADC_Raw, &adc_chars));
 }
 
+AsyncWebServer server(80);
+
+void enableOTAUpdate() {
+  WiFi.mode(WIFI_AP);
+
+  WiFi.softAP("AnchorAlarmOTA");
+
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", "Hi! Head to /update to update the firmware. Use a .bin file from platformio build output");
+  });
+  
+  AsyncElegantOTA.begin(&server);    // Start AsyncElegantOTA
+  server.begin();
+}
+
+int startupTime = millis();
+bool serverOn = true;
 
 int alarm_range = 250;
 
@@ -85,8 +106,9 @@ void read_encoder() {
 void setup() {
     Serial.begin(9600);
 
-    WiFi.mode( WIFI_OFF );
-    btStop();
+    enableOTAUpdate();
+
+
 
     pinMode(ROTARY_PIN_A, INPUT_PULLUP);
     pinMode(ROTARY_PIN_B, INPUT_PULLUP);
@@ -144,9 +166,13 @@ void checkDistance() {
     current_distance *= 3.281; // convert to feet
       if (current_distance > alarm_range) {
       alarm(true);
+    } else if (Voltage < 3400) {
+      alarm(true);
     } else {
       alarm(false);
     }
+
+
   } else {
     alarm(false);
   }
@@ -158,8 +184,7 @@ void lockLost() {
   display.clearDisplay();
   display.setCursor(0,0);
   display.println("GPS Lock: No");
-  display.println("Locked: " + String(gps.satellites.value()));
-  display.println(lastGpsLock.age());
+  display.println("Sattelites: " + String(gps.satellites.value()));
 
   display.display();
   if (is_armed) {
@@ -170,9 +195,17 @@ void lockLost() {
 void loop() {
   button.loop();
   
-   if (lastGpsLock.isValid() && lastGpsLock.age() > 10000 && is_armed){
-    lockLost();
-   }
+  if (lastGpsLock.isValid() && lastGpsLock.age() > 10000 && is_armed){
+  lockLost();
+  }
+
+  // after 5 minutes shut off wifi
+  if (serverOn && (millis() - startupTime) > 300000){
+    serverOn = false;
+    server.end();
+    WiFi.mode( WIFI_OFF );
+    btStop();
+  }
 
 
   Voltage = (readADC_Cal(analogRead(BAT_ADC))) * 2 ;
