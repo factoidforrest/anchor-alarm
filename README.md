@@ -23,7 +23,7 @@ It is designed to run on the Esp32.
 
 ## 3d Printed Case
 
-If you match the above hardware including the mainboard, you can use my 3d printed case. TODO: ADD LINK TO CASE
+If you match the above hardware including the mainboard, you can use my 3d printed case. STL files are in the repo root.
 
 ![case pic](/schematic/sideonpic.jpg)
 
