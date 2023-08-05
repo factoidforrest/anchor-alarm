@@ -9,6 +9,7 @@
 #include <AsyncElegantOTA.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <LoRa.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -144,6 +145,28 @@ void setup() {
 
 }
 
+double calculateBearing(double lat1, double long1, double lat2, double long2) {
+  lat1 = lat1 * (M_PI / 180);
+  long1 = long1 * (M_PI / 180);
+  lat2 = lat2 * (M_PI / 180);
+  long2 = long2 * (M_PI / 180);
+
+  double dLon = (long2 - long1);
+  double x = cos(lat2) * sin(dLon);
+  double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+
+  double bearing = atan2(x, y);
+  bearing = bearing * (180 / M_PI);
+  bearing = (int)(bearing + 360) % 360;
+
+  return bearing;
+}
+
+String cardinalDirection(double bearing) {
+  const char* directions[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
+  int index = (int)((bearing + 11.25) / 22.5) % 16;
+  return directions[index];
+}
 
 
 void displayGPS() {
@@ -158,9 +181,14 @@ void displayGPS() {
   display.println(String("Range(feet): " + String(alarm_range) + "ft").c_str());
 
   if (is_armed) {
-    double current_distance = TinyGPSPlus::distanceBetween(gps.location.lat(), gps.location.lng(), anchor_lat, anchor_lng);
+    double current_distance = TinyGPSPlus::distanceBetween( anchor_lat, anchor_lng, gps.location.lat(), gps.location.lng() );
     current_distance *= 3.281; // convert to feet
-    display.println(String("Distance: " + String(current_distance, 2) + "ft").c_str());
+
+    double bearing = calculateBearing(anchor_lat, anchor_lng, gps.location.lat(), gps.location.lng());
+    String direction = cardinalDirection(bearing);
+    
+    display.println(String("Dist: " + String(current_distance, 2) + "ft " + direction).c_str());
+
   }
 
   if (WiFi.getMode() != WIFI_OFF){
